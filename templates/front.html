@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='styles/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='styles/spinner.css') }}"
+    />
+
+    <title>OpenAI Image Genrator</title>
+  </head>
+  <body>
+    <header>
+      <div class="navbar">
+        <div class="logo">
+          <h2>OpenAI Image Genrator</h2>
+        </div>
+        <div class="nav-links">
+          <ul>
+            <li>
+              <a href="https://beta.openai.com/docs" target="_blank"
+                >OpenAI API Docs</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="showcase">
+        <form id="image-form">
+          <h1>Describe An Image</h1>
+          <div class="form-control">
+            <input
+              type="text"
+              id="imagename"
+              placeholder="An astronaut riding a horse in photorealistic style"
+              value=""
+            />
+          </div>
+          <!-- size -->
+          <div class="form-control">
+            <select name="size" id="size">
+              <option value="small">Small</option>
+              <option value="medium" selected>Medium</option>
+              <option value="large">Large</option>
+            </select>
+          </div>
+          <div class="form-control">
+            <select name="count" id="count">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </div>
+          <button type="submit" class="btn" id="fetchImage">Generate</button>
+        </form>
+      </section>
+    </main>
+
+    <div class="spinner"></div>
+    <div id="imageContainer"></div>
+
+    <script>
+      const button = document.getElementById("fetchImage");
+      button.addEventListener("click", generate());
+
+      function generate() {
+        const imageContainer = document.getElementById("imageContainer");
+        const input = document.getElementById("imagename");
+        const size = document.getElementById("size");
+        const count = document.getElementById("count");
+        event.preventDefault();
+        showSpinner();
+        const apiURL = "http://127.0.0.1:5000/generate?";
+        const img_text = "image=" + input.value;
+        const img_size = "&size=" + size.value;
+        const img_count = "&count=" + count.value;
+        const query_url = apiURL + img_text + img_size + img_count;
+
+        fetch(query_url, {
+          mode: "cors",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            const imageURL = data.image_url;
+            imageContainer.innerHTML = "";
+            for (i in imageURL) {
+              let url = imageURL[i];
+              const img = document.createElement("img");
+              img.src = url;
+
+              imageContainer.appendChild(img);
+            }
+            removeSpinner();
+          })
+          .catch((error) => {
+            console.error(error);
+            removeSpinner();
+          });
+      }
+
+      function showSpinner() {
+        document.querySelector(".spinner").classList.add("show");
+      }
+
+      function removeSpinner() {
+        document.querySelector(".spinner").classList.remove("show");
+      }
+    </script>
+  </body>
+</html>
